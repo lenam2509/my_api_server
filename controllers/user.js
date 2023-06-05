@@ -1,6 +1,7 @@
-
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 const DangKy = async (req, res) => {
     try {
@@ -25,7 +26,14 @@ const DangNhap = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ error: "Sai mật khẩu" });
         }
-        res.status(200).json({ user: currentUser });
+        const payload = {
+            id: currentUser._id,
+            name: currentUser.name,
+            email: currentUser.email,
+            role: currentUser.role
+        }
+        const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+        res.status(200).json({ user: currentUser, token: token });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
